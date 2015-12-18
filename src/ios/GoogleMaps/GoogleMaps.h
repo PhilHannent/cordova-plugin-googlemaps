@@ -6,6 +6,7 @@
 //
 //
 
+#import <UIKit/UIKit.h>
 #import <Cordova/CDV.h>
 #import <GoogleMaps/GoogleMaps.h>
 #import "GoogleMapsViewController.h"
@@ -26,6 +27,7 @@
 @property (nonatomic, strong) NSMutableArray *locationCommandQueue;
 @property (nonatomic) MyPluginScrollView *pluginScrollView;
 @property (nonatomic) MyPluginLayer *pluginLayer;
+@property (nonatomic, readwrite, strong) NSMutableDictionary* settings;
 
 - (void)exec:(CDVInvokedUrlCommand*)command;
 - (void)showDialog:(CDVInvokedUrlCommand*)command;

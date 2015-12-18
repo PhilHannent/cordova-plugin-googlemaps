@@ -6,13 +6,14 @@
 //
 //
 
+#import <UIKit/UIKit.h>
 #import "GoogleMaps.h"
-#import "CDV.h"
-#import "CDVConfigParser.h"
+#import <Cordova/CDV.h>
+#import <Cordova/CDVConfigParser.h>
 
 @implementation GoogleMaps
 
-@synthesize configParser, settings;
+@synthesize settings;
 
 - (void)loadSettings
 {
@@ -28,7 +29,7 @@
 
     NSURL* url = [NSURL fileURLWithPath:path];
 
-    configParser = [[NSXMLParser alloc] initWithContentsOfURL:url];
+    NSXMLParser* configParser = [[NSXMLParser alloc] initWithContentsOfURL:url];
     if (configParser == nil) {
         NSLog(@"Failed to initialize XML parser.");
         return;
@@ -39,15 +40,6 @@
     // Get the plugin dictionary, whitelist and settings from the delegate.
     self.settings = delegate.settings;
 
-    // And the start folder/page.
-    self.wwwFolderName = @"www";
-    self.startPage = delegate.startPage;
-    if (self.startPage == nil) {
-        self.startPage = @"index.html";
-    }
-
-    // Initialize the plugin objects dict.
-    self.pluginObjects = [[NSMutableDictionary alloc] initWithCapacity:20];
 }
 
 - (id)settingForKey:(NSString*)key
@@ -96,7 +88,7 @@
     // load settings
     [self loadSettings];
 
-    NSString *APIKey = [[[NSBundle mainBundle] infoDictionary] settingForKey:@"API_KEY_FOR_IOS"];
+    NSString* APIKey = [self settingForKey:@"API_KEY_FOR_IOS"];
     if (APIKey == nil) {
         NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
         NSString *bundleName = [NSString stringWithFormat:@"%@", [info objectForKey:@"CFBundleDisplayName"]];
