@@ -7,11 +7,57 @@
 //
 
 #import "GoogleMaps.h"
+#import "CDV.h"
+#import "CDVConfigParser.h"
 
 @implementation GoogleMaps
 
+@synthesize configParser, settings;
+
+- (void)loadSettings
+{
+    CDVConfigParser* delegate = [[CDVConfigParser alloc] init];
+
+    // read from config.xml in the app bundle
+    NSString* path = [[NSBundle mainBundle] pathForResource:@"config" ofType:@"xml"];
+
+    if (![[NSFileManager defaultManager] fileExistsAtPath:path]) {
+        NSAssert(NO, @"ERROR: config.xml does not exist. Please run cordova-ios/bin/cordova_plist_to_config_xml path/to/project.");
+        return;
+    }
+
+    NSURL* url = [NSURL fileURLWithPath:path];
+
+    configParser = [[NSXMLParser alloc] initWithContentsOfURL:url];
+    if (configParser == nil) {
+        NSLog(@"Failed to initialize XML parser.");
+        return;
+    }
+    [configParser setDelegate:((id < NSXMLParserDelegate >)delegate)];
+    [configParser parse];
+
+    // Get the plugin dictionary, whitelist and settings from the delegate.
+    self.settings = delegate.settings;
+
+    // And the start folder/page.
+    self.wwwFolderName = @"www";
+    self.startPage = delegate.startPage;
+    if (self.startPage == nil) {
+        self.startPage = @"index.html";
+    }
+
+    // Initialize the plugin objects dict.
+    self.pluginObjects = [[NSMutableDictionary alloc] initWithCapacity:20];
+}
+
+- (id)settingForKey:(NSString*)key
+{
+    return [[self settings] objectForKey:[key lowercaseString]];
+}
+
 - (void)pluginInitialize
 {
+
     self.licenseLayer = nil;
     self.mapCtrl.isFullScreen = YES;
     self.locationCommandQueue = [[NSMutableArray alloc] init];
@@ -47,9 +93,10 @@
     
     [self.viewController.view addSubview:self.pluginLayer];
     
-    
-    
-    NSString *APIKey = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"Google Maps API Key"];
+    // load settings
+    [self loadSettings];
+
+    NSString *APIKey = [[[NSBundle mainBundle] infoDictionary] settingForKey:@"API_KEY_FOR_IOS"];
     if (APIKey == nil) {
         NSDictionary *info = [[NSBundle mainBundle] infoDictionary];
         NSString *bundleName = [NSString stringWithFormat:@"%@", [info objectForKey:@"CFBundleDisplayName"]];
