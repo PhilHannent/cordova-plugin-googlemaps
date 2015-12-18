@@ -101,6 +101,7 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
   private final HashMap<String, PluginEntry> plugins = new HashMap<String, PluginEntry>();
   private float density;
   private HashMap<String, Bundle> bufferForLocationDialog = new HashMap<String, Bundle>();
+  private CordovaPreferences preferences;
   
   private enum EVENTS {
     onScrollChanged
@@ -126,8 +127,11 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
   private GoogleApiClient googleApiClient = null;
   
   @SuppressLint("NewApi") @Override
-  public void initialize(final CordovaInterface cordova, final CordovaWebView webView) {
+  public void initialize(final CordovaInterface cordova,
+                         final CordovaWebView webView,
+                         CordovaPreferences preferences) {
     super.initialize(cordova, webView);
+    this.preferences = preferences;
     activity = cordova.getActivity();
     density = Resources.getSystem().getDisplayMetrics().density;
     final View view = webView.getView();
@@ -428,7 +432,8 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
         appliInfo = activity.getPackageManager().getApplicationInfo(activity.getPackageName(), PackageManager.GET_META_DATA);
     } catch (NameNotFoundException e) {}
     
-    String API_KEY = appliInfo.metaData.getString("com.google.android.maps.v2.API_KEY");
+    //String API_KEY = appliInfo.metaData.getString("com.google.android.maps.v2.API_KEY");
+    String API_KEY = preferences == null ? "" : preferences.getString("API_KEY_FOR_ANDROID", "");
     if ("API_KEY_FOR_ANDROID".equals(API_KEY)) {
     
       AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(activity);
